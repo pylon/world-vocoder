@@ -20,18 +20,18 @@ WORLD_BEGIN_C_DECLS
 typedef struct {
   // Basic parameters
   int fs;
-  double frame_period;
+  float frame_period;
   int buffer_size;
   int number_of_pointers;
   int fft_size;
 
   // Sound buffer for output. The length is buffer_size [sample].
-  double *buffer;
+  float *buffer;
   int current_pointer;
   int i;
 
   // For DC removal
-  double *dc_remover;
+  float *dc_remover;
 
   //---------------------------------------------------------------------------
   // Followings are internal parameters.
@@ -40,8 +40,8 @@ typedef struct {
   // Speech parameters in each pointer.
   int *f0_length;
   int *f0_origin;
-  double ***spectrogram;
-  double ***aperiodicity;
+  float ***spectrogram;
+  float ***aperiodicity;
 
 
   // Note:
@@ -53,19 +53,19 @@ typedef struct {
 
   // Internal parameters.
   int handoff;
-  double handoff_phase;
-  double handoff_f0;
+  float handoff_phase;
+  float handoff_f0;
   int last_location;
 
   int cumulative_frame;
   int current_frame;
 
-  double **interpolated_vuv;
-  double **pulse_locations;
+  float **interpolated_vuv;
+  float **pulse_locations;
   int **pulse_locations_index;
   int *number_of_pulses;
 
-  double *impulse_response;
+  float *impulse_response;
 
   // FFT
   MinimumPhaseAnalysis minimum_phase;
@@ -87,7 +87,7 @@ typedef struct {
 // Output:
 //   synth                : Initialized synthesizer
 //-----------------------------------------------------------------------------
-void InitializeSynthesizer(int fs, double frame_period, int fft_size,
+void InitializeSynthesizer(int fs, float frame_period, int fft_size,
   int buffer_size, int number_of_pointers, WorldSynthesizer *synth);
 
 //-----------------------------------------------------------------------------
@@ -106,8 +106,8 @@ void InitializeSynthesizer(int fs, double frame_period, int fft_size,
 // Return value:
 //   1: True, 0: False.
 //-----------------------------------------------------------------------------
-int AddParameters(double *f0, int f0_length, double **spectrogram,
-  double **aperiodicity, WorldSynthesizer *synth);
+int AddParameters(float *f0, int f0_length, float **spectrogram,
+  float **aperiodicity, WorldSynthesizer *synth);
 
 //-----------------------------------------------------------------------------
 // RefreshSynthesizer() sets the parameters to default.

@@ -25,8 +25,8 @@
 
 namespace {
 static void SetParametersForLinearSmoothing(int boundary, int fft_size, int fs,
-    double width, const double *power_spectrum, double *mirroring_spectrum,
-    double *mirroring_segment, double *frequency_axis) {
+    float width, const float *power_spectrum, float *mirroring_spectrum,
+    float *mirroring_segment, float *frequency_axis) {
   for (int i = 0; i < boundary; ++i)
     mirroring_spectrum[i] = power_spectrum[boundary - i];
   for (int i = boundary; i < fft_size / 2 + boundary; ++i)
@@ -41,7 +41,7 @@ static void SetParametersForLinearSmoothing(int boundary, int fft_size, int fs,
     mirroring_segment[i - 1];
 
   for (int i = 0; i <= fft_size / 2; ++i)
-    frequency_axis[i] = static_cast<double>(i) / fft_size *
+    frequency_axis[i] = static_cast<float>(i) / fft_size *
     fs - width / 2.0;
 }
 
@@ -50,21 +50,21 @@ static void SetParametersForLinearSmoothing(int boundary, int fft_size, int fs,
 //-----------------------------------------------------------------------------
 int GetSuitableFFTSize(int sample) {
   return static_cast<int>(pow(2.0,
-    static_cast<int>(log(static_cast<double>(sample)) / world::kLog2) + 1.0));
+    static_cast<int>(log(static_cast<float>(sample)) / world::kLog2) + 1.0));
 }
 
-void DCCorrection(const double *input, double f0, int fs, int fft_size,
-    double *output) {
+void DCCorrection(const float *input, float f0, int fs, int fft_size,
+    float *output) {
   int upper_limit = 2 + static_cast<int>(f0 * fft_size / fs);
-  double *low_frequency_replica = new double[upper_limit];
-  double *low_frequency_axis = new double[upper_limit];
+  float *low_frequency_replica = new float[upper_limit];
+  float *low_frequency_axis = new float[upper_limit];
 
   for (int i = 0; i < upper_limit; ++i)
-    low_frequency_axis[i] = static_cast<double>(i) * fs / fft_size;
+    low_frequency_axis[i] = static_cast<float>(i) * fs / fft_size;
 
   int upper_limit_replica = upper_limit - 1;
   interp1Q(f0 - low_frequency_axis[0],
-      -static_cast<double>(fs) / fft_size, input, upper_limit + 1,
+      -static_cast<float>(fs) / fft_size, input, upper_limit + 1,
       low_frequency_axis, upper_limit_replica, low_frequency_replica);
 
   for (int i = 0; i < upper_limit_replica; ++i)
@@ -74,21 +74,21 @@ void DCCorrection(const double *input, double f0, int fs, int fft_size,
   delete[] low_frequency_axis;
 }
 
-void LinearSmoothing(const double *input, double width, int fs, int fft_size,
-    double *output) {
+void LinearSmoothing(const float *input, float width, int fs, int fft_size,
+    float *output) {
   int boundary = static_cast<int>(width * fft_size / fs) + 1;
 
   // These parameters are set by the other function.
-  double *mirroring_spectrum = new double[fft_size / 2 + boundary * 2 + 1];
-  double *mirroring_segment = new double[fft_size / 2 + boundary * 2 + 1];
-  double *frequency_axis = new double[fft_size / 2 + 1];
+  float *mirroring_spectrum = new float[fft_size / 2 + boundary * 2 + 1];
+  float *mirroring_segment = new float[fft_size / 2 + boundary * 2 + 1];
+  float *frequency_axis = new float[fft_size / 2 + 1];
   SetParametersForLinearSmoothing(boundary, fft_size, fs, width,
       input, mirroring_spectrum, mirroring_segment, frequency_axis);
 
-  double *low_levels = new double[fft_size / 2 + 1];
-  double *high_levels = new double[fft_size / 2 + 1];
-  double origin_of_mirroring_axis = -(boundary - 0.5) * fs / fft_size;
-  double discrete_frequency_interval = static_cast<double>(fs) / fft_size;
+  float *low_levels = new float[fft_size / 2 + 1];
+  float *high_levels = new float[fft_size / 2 + 1];
+  float origin_of_mirroring_axis = -(boundary - 0.5) * fs / fft_size;
+  float discrete_frequency_interval = static_cast<float>(fs) / fft_size;
 
   interp1Q(origin_of_mirroring_axis, discrete_frequency_interval,
       mirroring_segment, fft_size / 2 + boundary * 2 + 1, frequency_axis,
@@ -110,8 +110,8 @@ void LinearSmoothing(const double *input, double width, int fs, int fft_size,
   delete[] high_levels;
 }
 
-void NuttallWindow(int y_length, double *y) {
-  double tmp;
+void NuttallWindow(int y_length, float *y) {
+  float tmp;
   for (int i = 0; i < y_length; ++i) {
     tmp  = i / (y_length - 1.0);
     y[i] = 0.355768 - 0.487396 * cos(2.0 * world::kPi * tmp) +
@@ -124,7 +124,7 @@ void NuttallWindow(int y_length, double *y) {
 // FFT, IFFT and minimum phase analysis
 void InitializeForwardRealFFT(int fft_size, ForwardRealFFT *forward_real_fft) {
   forward_real_fft->fft_size = fft_size;
-  forward_real_fft->waveform = new double[fft_size];
+  forward_real_fft->waveform = new float[fft_size];
   forward_real_fft->spectrum = new fft_complex[fft_size];
   forward_real_fft->forward_fft = fft_plan_dft_r2c_1d(fft_size,
       forward_real_fft->waveform, forward_real_fft->spectrum, FFT_ESTIMATE);
@@ -138,7 +138,7 @@ void DestroyForwardRealFFT(ForwardRealFFT *forward_real_fft) {
 
 void InitializeInverseRealFFT(int fft_size, InverseRealFFT *inverse_real_fft) {
   inverse_real_fft->fft_size = fft_size;
-  inverse_real_fft->waveform = new double[fft_size];
+  inverse_real_fft->waveform = new float[fft_size];
   inverse_real_fft->spectrum = new fft_complex[fft_size];
   inverse_real_fft->inverse_fft = fft_plan_dft_c2r_1d(fft_size,
       inverse_real_fft->spectrum, inverse_real_fft->waveform, FFT_ESTIMATE);
@@ -169,7 +169,7 @@ void DestroyInverseComplexFFT(InverseComplexFFT *inverse_complex_fft) {
 void InitializeMinimumPhaseAnalysis(int fft_size,
     MinimumPhaseAnalysis *minimum_phase) {
   minimum_phase->fft_size = fft_size;
-  minimum_phase->log_spectrum = new double[fft_size];
+  minimum_phase->log_spectrum = new float[fft_size];
   minimum_phase->minimum_phase_spectrum = new fft_complex[fft_size];
   minimum_phase->cepstrum = new fft_complex[fft_size];
   minimum_phase->inverse_fft = fft_plan_dft_r2c_1d(fft_size,
@@ -206,7 +206,7 @@ void GetMinimumPhaseSpectrum(const MinimumPhaseAnalysis *minimum_phase) {
 
   // Since x is complex number, calculation of exp(x) is as following.
   // Note: This FFT library does not keep the aliasing.
-  double tmp;
+  float tmp;
   for (int i = 0; i <= minimum_phase->fft_size / 2; ++i) {
     tmp = exp(minimum_phase->minimum_phase_spectrum[i][0] /
       minimum_phase->fft_size);

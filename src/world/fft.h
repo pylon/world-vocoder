@@ -19,26 +19,26 @@ WORLD_BEGIN_C_DECLS
 #define FFT_ESTIMATE 3
 
 // Complex number for FFT
-typedef double fft_complex[2];
+typedef float fft_complex[2];
 // Struct used for FFT
 typedef struct {
   int n;
   int sign;
   unsigned int flags;
   fft_complex *c_in;
-  double *in;
+  float *in;
   fft_complex *c_out;
-  double *out;
-  double *input;
+  float *out;
+  float *input;
   int *ip;
-  double *w;
+  float *w;
 } fft_plan;
 
 fft_plan fft_plan_dft_1d(int n, fft_complex *in, fft_complex *out, int sign,
   unsigned int flags);
-fft_plan fft_plan_dft_c2r_1d(int n, fft_complex *in, double *out,
+fft_plan fft_plan_dft_c2r_1d(int n, fft_complex *in, float *out,
   unsigned int flags);
-fft_plan fft_plan_dft_r2c_1d(int n, double *in, fft_complex *out,
+fft_plan fft_plan_dft_r2c_1d(int n, float *in, fft_complex *out,
   unsigned int flags);
 void fft_execute(fft_plan p);
 void fft_destroy_plan(fft_plan p);

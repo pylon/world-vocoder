@@ -22,7 +22,7 @@ extern "C" {
 //   The variable nbit is not used in this function.
 //   This function only supports the 16 bit.
 //-----------------------------------------------------------------------------
-void wavwrite(const double *x, int x_length, int fs, int nbit,
+void wavwrite(const float *x, int x_length, int fs, int nbit,
   const char *filename);
 
 //-----------------------------------------------------------------------------
@@ -44,7 +44,7 @@ int GetAudioLength(const char *filename);
 //   nbit         : Quantization bit [bit]
 //   x            : The output waveform.
 //-----------------------------------------------------------------------------
-void wavread(const char* filename, int *fs, int *nbit, double *x);
+void wavread(const char* filename, int *fs, int *nbit, float *x);
 
 #ifdef __cplusplus
 }

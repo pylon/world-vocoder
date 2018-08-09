@@ -64,15 +64,15 @@ DWORD timeGetTime() {
 // Users are NOT forced to use this struct.
 //-----------------------------------------------------------------------------
 typedef struct {
-    double frame_period;
+    float frame_period;
     int fs;
 
-    double *f0;
-    double *time_axis;
+    float *f0;
+    float *time_axis;
     int f0_length;
 
-    double **spectrogram;
-    double **aperiodicity;
+    float **spectrogram;
+    float **aperiodicity;
     int fft_size;
 } WorldParameters;
 
@@ -87,7 +87,7 @@ namespace {
     }
 
 
-    void WaveformSynthesis(WorldParameters *world_parameters, double *y)
+    void WaveformSynthesis(WorldParameters *world_parameters, float *y)
     {
         DWORD elapsed_time;
 
@@ -133,13 +133,13 @@ int main(int argc, char *argv[])
     // Define a default filled structures
     WorldParameters world_parameters;
     world_parameters.fs = 0; // this value will be filled when reading the spectrogram file
-    world_parameters.f0_length = filesize(argv[1]) / sizeof(double);
+    world_parameters.f0_length = filesize(argv[1]) / sizeof(float);
     // The first bytes in the spectrogram file contains the sampling frequency and
     // the frame period, so we need to subtract those bytes from the spectrogram size
     size_t specSize = (size_t) filesize(argv[2]) - sizeof(world_parameters.fs) -
         sizeof(world_parameters.frame_period);
     // Be careful that .sp contains only first half of the spectrum
-    world_parameters.fft_size = ( (specSize / (sizeof(double) * world_parameters.f0_length)) - 1 ) * 2;
+    world_parameters.fft_size = ( (specSize / (sizeof(float) * world_parameters.f0_length)) - 1 ) * 2;
     std::cout << "fft size = " << world_parameters.fft_size << std::endl;
 
     // 5.0 ms is the default value.
@@ -152,15 +152,15 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------------
     // Prepare memory
     //---------------------------------------------------------------------------
-    world_parameters.f0 = new double[world_parameters.f0_length];
+    world_parameters.f0 = new float[world_parameters.f0_length];
 
-    world_parameters.spectrogram = new double*[world_parameters.f0_length];
+    world_parameters.spectrogram = new float*[world_parameters.f0_length];
     for (int i=0;i<world_parameters.f0_length; i++)
-        world_parameters.spectrogram[i] = new double[world_parameters.fft_size / 2 + 1];
+        world_parameters.spectrogram[i] = new float[world_parameters.fft_size / 2 + 1];
 
-    world_parameters.aperiodicity = new double*[world_parameters.f0_length];
+    world_parameters.aperiodicity = new float*[world_parameters.f0_length];
     for (int i=0;i<world_parameters.f0_length; i++)
-        world_parameters.aperiodicity[i] = new double[world_parameters.fft_size / 2 + 1];
+        world_parameters.aperiodicity[i] = new float[world_parameters.fft_size / 2 + 1];
 
     //---------------------------------------------------------------------------
     // Loading
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
         return false;
 
     is_f0.read(reinterpret_cast<char*>(world_parameters.f0),
-               std::streamsize(world_parameters.f0_length*sizeof(double)));
+               std::streamsize(world_parameters.f0_length*sizeof(float)));
     // for (int i=0; i<world_parameters.f0_length; i++)
     //     std::cout << world_parameters.f0[i] << std::endl;
     is_f0.close();
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
     for (int i=0; i<world_parameters.f0_length; i++)
     {
         is_spectrogram.read(reinterpret_cast<char*>(world_parameters.spectrogram[i]),
-                            std::streamsize((world_parameters.fft_size / 2 + 1)*sizeof(double)));
+                            std::streamsize((world_parameters.fft_size / 2 + 1)*sizeof(float)));
     }
 
     is_spectrogram.close();
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
     for (int i=0; i<world_parameters.f0_length; i++)
     {
         is_aperiodicity.read(reinterpret_cast<char*>(world_parameters.aperiodicity[i]),
-                             std::streamsize((world_parameters.fft_size / 2 + 1)*sizeof(double)));
+                             std::streamsize((world_parameters.fft_size / 2 + 1)*sizeof(float)));
     }
 
     is_aperiodicity.close();
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
 
     int y_length = static_cast<int>((world_parameters.f0_length - 1) *
                                     world_parameters.frame_period / 1000.0 * world_parameters.fs) + 1;
-    double *y = new double[y_length];
+    float *y = new float[y_length];
     for (int i = 0; i < y_length; ++i) y[i] = 0.0;
     WaveformSynthesis(&world_parameters, y);
     wavwrite(y, y_length, world_parameters.fs, 16, argv[4]);

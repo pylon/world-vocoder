@@ -24,8 +24,8 @@ namespace {
 // FilterForDecimate() calculates the coefficients of low-pass filter and
 // carries out the filtering. This function is only used for decimate().
 //-----------------------------------------------------------------------------
-static void FilterForDecimate(const double *x, int x_length, int r, double *y) {
-  double a[3], b[2];  // filter Coefficients
+static void FilterForDecimate(const float *x, int x_length, int r, float *y) {
+  float a[3], b[2];  // filter Coefficients
   switch (r) {
     case 11:  // fs : 44100 (default)
       a[0] = 2.450743295230728;
@@ -113,8 +113,8 @@ static void FilterForDecimate(const double *x, int x_length, int r, double *y) {
   }
 
   // Filtering on time domain.
-  double w[3] = {0.0, 0.0, 0.0};
-  double wt;
+  float w[3] = {0.0, 0.0, 0.0};
+  float wt;
   for (int i = 0; i < x_length; ++i) {
     wt = x[i] + a[0] * w[0] + a[1] * w[1] + a[2] * w[2];
     y[i] = b[0] * wt + b[1] * w[0] + b[1] * w[1] + b[0] * w[2];
@@ -126,14 +126,14 @@ static void FilterForDecimate(const double *x, int x_length, int r, double *y) {
 
 }  // namespace
 
-void fftshift(const double *x, int x_length, double *y) {
+void fftshift(const float *x, int x_length, float *y) {
   for (int i = 0; i < x_length / 2; ++i) {
     y[i] = x[i + x_length / 2];
     y[i + x_length / 2] = x[i];
   }
 }
 
-void histc(const double *x, int x_length, const double *edges,
+void histc(const float *x, int x_length, const float *edges,
     int edges_length, int *index) {
   int count = 1;
 
@@ -154,11 +154,11 @@ void histc(const double *x, int x_length, const double *edges,
   for (i++; i < edges_length; ++i) index[i] = count;
 }
 
-void interp1(const double *x, const double *y, int x_length, const double *xi,
-    int xi_length, double *yi) {
-  double *h = new double[x_length - 1];
-  double *p = new double[xi_length];
-  double *s = new double[xi_length];
+void interp1(const float *x, const float *y, int x_length, const float *xi,
+    int xi_length, float *yi) {
+  float *h = new float[x_length - 1];
+  float *p = new float[xi_length];
+  float *s = new float[xi_length];
   int *k = new int[xi_length];
 
   for (int i = 0; i < x_length - 1; ++i) h[i] = x[i + 1] - x[i];
@@ -181,10 +181,10 @@ void interp1(const double *x, const double *y, int x_length, const double *xi,
   delete[] h;
 }
 
-void decimate(const double *x, int x_length, int r, double *y) {
+void decimate(const float *x, int x_length, int r, float *y) {
   const int kNFact = 9;
-  double *tmp1 = new double[x_length + kNFact * 2];
-  double *tmp2 = new double[x_length + kNFact * 2];
+  float *tmp1 = new float[x_length + kNFact * 2];
+  float *tmp2 = new float[x_length + kNFact * 2];
 
   for (int i = 0; i < kNFact; ++i) tmp1[i] = 2 * x[0] - x[kNFact - i];
   for (int i = kNFact; i < kNFact + x_length; ++i) tmp1[i] = x[i - kNFact];
@@ -209,21 +209,21 @@ void decimate(const double *x, int x_length, int r, double *y) {
   delete[] tmp2;
 }
 
-int matlab_round(double x) {
+int matlab_round(float x) {
   return x > 0 ? static_cast<int>(x + 0.5) : static_cast<int>(x - 0.5);
 }
 
-void diff(const double *x, int x_length, double *y) {
+void diff(const float *x, int x_length, float *y) {
   for (int i = 0; i < x_length - 1; ++i) y[i] = x[i + 1] - x[i];
 }
 
-void interp1Q(double x, double shift, const double *y, int x_length,
-    const double *xi, int xi_length, double *yi) {
-  double *xi_fraction = new double[xi_length];
-  double *delta_y = new double[x_length];
+void interp1Q(float x, float shift, const float *y, int x_length,
+    const float *xi, int xi_length, float *yi) {
+  float *xi_fraction = new float[xi_length];
+  float *delta_y = new float[x_length];
   int *xi_base = new int[xi_length];
 
-  double delta_x = shift;
+  float delta_x = shift;
   for (int i = 0; i < xi_length; ++i) {
     xi_base[i] = static_cast<int>((xi[i] - x) / delta_x);
     xi_fraction[i] = (xi[i] - x) / delta_x - xi_base[i];
@@ -256,7 +256,7 @@ void randn_reseed() {
     g_randn_w = 88675123;
 }
 
-double randn(void) {
+float randn(void) {
   uint32_t t;
   t = g_randn_x ^ (g_randn_x << 11);
   g_randn_x = g_randn_y;
@@ -276,9 +276,9 @@ double randn(void) {
   return tmp / 268435456.0 - 6.0;
 }
 
-void fast_fftfilt(const double *x, int x_length, const double *h, int h_length,
+void fast_fftfilt(const float *x, int x_length, const float *h, int h_length,
     int fft_size, const ForwardRealFFT *forward_real_fft,
-    const InverseRealFFT *inverse_real_fft, double *y) {
+    const InverseRealFFT *inverse_real_fft, float *y) {
   fft_complex *x_spectrum = new fft_complex[fft_size];
 
   for (int i = 0; i < x_length; ++i)
@@ -313,12 +313,12 @@ void fast_fftfilt(const double *x, int x_length, const double *h, int h_length,
   delete[] x_spectrum;
 }
 
-double matlab_std(const double *x, int x_length) {
-  double average = 0.0;
+float matlab_std(const float *x, int x_length) {
+  float average = 0.0;
   for (int i = 0; i < x_length; ++i) average += x[i];
   average /= x_length;
 
-  double s = 0.0;
+  float s = 0.0;
   for (int i = 0; i < x_length; ++i) s += pow(x[i] - average, 2.0);
   s /= (x_length - 1);
 

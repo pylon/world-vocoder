@@ -14,9 +14,9 @@ WORLD_BEGIN_C_DECLS
 // Struct for Harvest
 //-----------------------------------------------------------------------------
 typedef struct {
-  double f0_floor;
-  double f0_ceil;
-  double frame_period;
+  float f0_floor;
+  float f0_ceil;
+  float frame_period;
 } HarvestOption;
 
 //-----------------------------------------------------------------------------
@@ -32,8 +32,8 @@ typedef struct {
 //   temporal_positions   : Temporal positions.
 //   f0                   : F0 contour.
 //-----------------------------------------------------------------------------
-void Harvest(const double *x, int x_length, int fs,
-  const HarvestOption *option, double *temporal_positions, double *f0);
+void Harvest(const float *x, int x_length, int fs,
+  const HarvestOption *option, float *temporal_positions, float *f0);
 
 //-----------------------------------------------------------------------------
 // InitializeHarvestOption allocates the memory to the struct and sets the
@@ -56,7 +56,7 @@ void InitializeHarvestOption(HarvestOption *option);
 // Output:
 //   The number of samples required to store the results of Harvest().
 //-----------------------------------------------------------------------------
-int GetSamplesForHarvest(int fs, int x_length, double frame_period);
+int GetSamplesForHarvest(int fs, int x_length, float frame_period);
 
 WORLD_END_C_DECLS
 

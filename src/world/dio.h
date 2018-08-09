@@ -14,12 +14,12 @@ WORLD_BEGIN_C_DECLS
 // Struct for DIO
 //-----------------------------------------------------------------------------
 typedef struct {
-  double f0_floor;
-  double f0_ceil;
-  double channels_in_octave;
-  double frame_period;  // msec
+  float f0_floor;
+  float f0_ceil;
+  float channels_in_octave;
+  float frame_period;  // msec
   int speed;  // (1, 2, ..., 12)
-  double allowed_range;  // Threshold used for fixing the F0 contour.
+  float allowed_range;  // Threshold used for fixing the F0 contour.
 } DioOption;
 
 //-----------------------------------------------------------------------------
@@ -35,8 +35,8 @@ typedef struct {
 //   temporal_positions   : Temporal positions.
 //   f0                   : F0 contour.
 //-----------------------------------------------------------------------------
-void Dio(const double *x, int x_length, int fs, const DioOption *option,
-  double *temporal_positions, double *f0);
+void Dio(const float *x, int x_length, int fs, const DioOption *option,
+  float *temporal_positions, float *f0);
 
 //-----------------------------------------------------------------------------
 // InitializeDioOption allocates the memory to the struct and sets the
@@ -58,7 +58,7 @@ void InitializeDioOption(DioOption *option);
 // Output:
 //   The number of samples required to store the results of Dio()
 //-----------------------------------------------------------------------------
-int GetSamplesForDIO(int fs, int x_length, double frame_period);
+int GetSamplesForDIO(int fs, int x_length, float frame_period);
 
 WORLD_END_C_DECLS
 

@@ -60,15 +60,15 @@ DWORD timeGetTime() {
 // Users are NOT forced to use this struct.
 //-----------------------------------------------------------------------------
 typedef struct {
-    double frame_period;
+    float frame_period;
     int fs;
 
-    double *f0;
-    double *time_axis;
+    float *f0;
+    float *time_axis;
     int f0_length;
 
-    double **spectrogram;
-    double **aperiodicity;
+    float **spectrogram;
+    float **aperiodicity;
     int fft_size;
 } WorldParameters;
 
@@ -87,7 +87,7 @@ namespace {
         std::cout << "File information" << std::endl;
         std::cout << "Sampling : " << fs << " Hz " << nbit << " Bit" << std::endl;
         std::cout << "Length " << x_length << " [sample]" << std::endl;
-        std::cout << "Length " << static_cast<double>(x_length) / fs <<  "[sec]" << std::endl;
+        std::cout << "Length " << static_cast<float>(x_length) / fs <<  "[sec]" << std::endl;
     }
 
     /**
@@ -95,10 +95,10 @@ namespace {
      *
      *    @param x : the signal samples
      *    @param x_length : the number of samples
-     *    @param world_parameters : the world structure which is going to contains the F0 values (double format)
+     *    @param world_parameters : the world structure which is going to contains the F0 values (float format)
      *     in the f0 structure field
      */
-    void F0Estimation(double *x, int x_length, WorldParameters *world_parameters)
+    void F0Estimation(float *x, int x_length, WorldParameters *world_parameters)
     {
         DioOption option = {0};
         InitializeDioOption(&option);
@@ -127,9 +127,9 @@ namespace {
         // Parameters setting and memory allocation.
         world_parameters->f0_length = GetSamplesForDIO(world_parameters->fs,
                                                        x_length, world_parameters->frame_period);
-        world_parameters->f0 = new double[world_parameters->f0_length];
-        world_parameters->time_axis = new double[world_parameters->f0_length];
-        double *refined_f0 = new double[world_parameters->f0_length];
+        world_parameters->f0 = new float[world_parameters->f0_length];
+        world_parameters->time_axis = new float[world_parameters->f0_length];
+        float *refined_f0 = new float[world_parameters->f0_length];
 
         std::cout << std::endl << "Analysis" << std::endl;
         DWORD elapsed_time = timeGetTime();
@@ -157,10 +157,10 @@ namespace {
      *
      *    @param x : the signal samples
      *    @param x_length : the number of samples
-     *    @param world_parameters : the world structure which is going to contains the spectrogram (double values)
+     *    @param world_parameters : the world structure which is going to contains the spectrogram (float values)
      *    in the spectrogram structure field
      */
-    void SpectralEnvelopeEstimation(double *x, int x_length,
+    void SpectralEnvelopeEstimation(float *x, int x_length,
                                     WorldParameters *world_parameters)
     {
         CheapTrickOption option;
@@ -184,10 +184,10 @@ namespace {
         // Parameters setting and memory allocation.
         world_parameters->fft_size =
             GetFFTSizeForCheapTrick(world_parameters->fs, &option);
-        world_parameters->spectrogram = new double *[world_parameters->f0_length];
+        world_parameters->spectrogram = new float *[world_parameters->f0_length];
         for (int i = 0; i < world_parameters->f0_length; ++i) {
             world_parameters->spectrogram[i] =
-                new double[world_parameters->fft_size / 2 + 1];
+                new float[world_parameters->fft_size / 2 + 1];
         }
 
         DWORD elapsed_time = timeGetTime();
@@ -202,20 +202,20 @@ namespace {
      *
      *    @param x : the signal samples
      *    @param x_length : the number of samples
-     *    @param world_parameters : the world structure which is going to contains the aperidicity (double values)
+     *    @param world_parameters : the world structure which is going to contains the aperidicity (float values)
      *    in the aperiodicity structure field
      */
-    void AperiodicityEstimation(double *x, int x_length,
+    void AperiodicityEstimation(float *x, int x_length,
                                 WorldParameters *world_parameters)
     {
         D4COption option;
         InitializeD4COption(&option);
 
         // Parameters setting and memory allocation.
-        world_parameters->aperiodicity = new double *[world_parameters->f0_length];
+        world_parameters->aperiodicity = new float *[world_parameters->f0_length];
         for (int i = 0; i < world_parameters->f0_length; ++i) {
             world_parameters->aperiodicity[i] =
-                new double[world_parameters->fft_size / 2 + 1];
+                new float[world_parameters->fft_size / 2 + 1];
         }
 
         DWORD elapsed_time = timeGetTime();
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
             std::cerr << "error: File \"" << argv[1] << "\" is not a .wav format"  << std::endl;
         return EXIT_FAILURE;
     }
-    double *x = new double[x_length];
+    float *x = new float[x_length];
 
     // wavread() must be called after GetAudioLength().
     int fs, nbit;
@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
     }
 
     out_f0.write(reinterpret_cast<const char*>(world_parameters.f0),
-                 std::streamsize(world_parameters.f0_length * sizeof(double)));
+                 std::streamsize(world_parameters.f0_length * sizeof(float)));
     out_f0.close();
 
     // Spectrogram saving
@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
     for (int i=0; i<world_parameters.f0_length; i++)
     {
         out_spectrogram.write(reinterpret_cast<const char*>(world_parameters.spectrogram[i]),
-                              std::streamsize((world_parameters.fft_size / 2 + 1) * sizeof(double)));
+                              std::streamsize((world_parameters.fft_size / 2 + 1) * sizeof(float)));
     }
 
     out_spectrogram.close();
@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
     for (int i=0; i<world_parameters.f0_length; i++)
     {
         out_aperiodicity.write(reinterpret_cast<const char*>(world_parameters.aperiodicity[i]),
-                               std::streamsize((world_parameters.fft_size / 2 + 1) * sizeof(double)));
+                               std::streamsize((world_parameters.fft_size / 2 + 1) * sizeof(float)));
     }
 
     out_aperiodicity.close();

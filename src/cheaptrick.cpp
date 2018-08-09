@@ -19,17 +19,17 @@ namespace {
 // SmoothingWithRecovery() carries out the spectral smoothing and spectral
 // recovery on the Cepstrum domain.
 //-----------------------------------------------------------------------------
-static void SmoothingWithRecovery(double f0, int fs, int fft_size, double q1,
+static void SmoothingWithRecovery(float f0, int fs, int fft_size, float q1,
     const ForwardRealFFT *forward_real_fft,
-    const InverseRealFFT *inverse_real_fft, double *spectral_envelope) {
-  double *smoothing_lifter = new double[fft_size];
-  double *compensation_lifter = new double[fft_size];
+    const InverseRealFFT *inverse_real_fft, float *spectral_envelope) {
+  float *smoothing_lifter = new float[fft_size];
+  float *compensation_lifter = new float[fft_size];
 
   smoothing_lifter[0] = 1.0;
   compensation_lifter[0] = (1.0 - 2.0 * q1) + 2.0 * q1;
-  double quefrency;
+  float quefrency;
   for (int i = 1; i <= forward_real_fft->fft_size / 2; ++i) {
-    quefrency = static_cast<double>(i) / fs;
+    quefrency = static_cast<float>(i) / fs;
     smoothing_lifter[i] = sin(world::kPi * f0 * quefrency) /
       (world::kPi * f0 * quefrency);
     compensation_lifter[i] = (1.0 - 2.0 * q1) + 2.0 * q1 *
@@ -61,7 +61,7 @@ static void SmoothingWithRecovery(double f0, int fs, int fft_size, double q1,
 // DC stands for Direct Current. In this case, the component from 0 to F0 Hz
 // is corrected.
 //-----------------------------------------------------------------------------
-static void GetPowerSpectrum(int fs, double f0, int fft_size,
+static void GetPowerSpectrum(int fs, float f0, int fft_size,
     const ForwardRealFFT *forward_real_fft) {
   int half_window_length = matlab_round(1.5 * fs / f0);
 
@@ -71,7 +71,7 @@ static void GetPowerSpectrum(int fs, double f0, int fft_size,
   fft_execute(forward_real_fft->forward_fft);
 
   // Calculation of the power spectrum.
-  double *power_spectrum = forward_real_fft->waveform;
+  float *power_spectrum = forward_real_fft->waveform;
   for (int i = 0; i <= fft_size / 2; ++i)
     power_spectrum[i] =
       forward_real_fft->spectrum[i][0] * forward_real_fft->spectrum[i][0] +
@@ -85,8 +85,8 @@ static void GetPowerSpectrum(int fs, double f0, int fft_size,
 // SetParametersForGetWindowedWaveform()
 //-----------------------------------------------------------------------------
 static void SetParametersForGetWindowedWaveform(int half_window_length,
-    int x_length, double currnet_position, int fs, double current_f0,
-    int *base_index, int *safe_index, double *window) {
+    int x_length, float currnet_position, int fs, float current_f0,
+    int *base_index, int *safe_index, float *window) {
   for (int i = -half_window_length; i <= half_window_length; ++i)
     base_index[i + half_window_length] = i;
   int origin = matlab_round(currnet_position * fs + 0.001);
@@ -95,8 +95,8 @@ static void SetParametersForGetWindowedWaveform(int half_window_length,
       MyMinInt(x_length - 1, MyMaxInt(0, origin + base_index[i]));
 
   // Designing of the window function
-  double average = 0.0;
-  double position;
+  float average = 0.0;
+  float position;
   for (int i = 0; i <= half_window_length * 2; ++i) {
     position = base_index[i] / 1.5 / fs;
     window[i] = 0.5 * cos(world::kPi * position * current_f0) + 0.5;
@@ -109,30 +109,30 @@ static void SetParametersForGetWindowedWaveform(int half_window_length,
 //-----------------------------------------------------------------------------
 // GetWindowedWaveform() windows the waveform by F0-adaptive window
 //-----------------------------------------------------------------------------
-static void GetWindowedWaveform(const double *x, int x_length, int fs,
-    double current_f0, double currnet_position,
+static void GetWindowedWaveform(const float *x, int x_length, int fs,
+    float current_f0, float currnet_position,
     const ForwardRealFFT *forward_real_fft) {
   int half_window_length = matlab_round(1.5 * fs / current_f0);
 
   int *base_index = new int[half_window_length * 2 + 1];
   int *safe_index = new int[half_window_length * 2 + 1];
-  double *window  = new double[half_window_length * 2 + 1];
+  float *window  = new float[half_window_length * 2 + 1];
 
   SetParametersForGetWindowedWaveform(half_window_length, x_length,
       currnet_position, fs, current_f0, base_index, safe_index, window);
 
   // F0-adaptive windowing
-  double *waveform = forward_real_fft->waveform;
+  float *waveform = forward_real_fft->waveform;
   for (int i = 0; i <= half_window_length * 2; ++i)
     waveform[i] = x[safe_index[i]] * window[i] +
       randn() * world::kMySafeGuardMinimum;
-  double tmp_weight1 = 0;
-  double tmp_weight2 = 0;
+  float tmp_weight1 = 0;
+  float tmp_weight2 = 0;
   for (int i = 0; i <= half_window_length * 2; ++i) {
     tmp_weight1 += waveform[i];
     tmp_weight2 += window[i];
   }
-  double weighting_coefficient = tmp_weight1 / tmp_weight2;
+  float weighting_coefficient = tmp_weight1 / tmp_weight2;
   for (int i = 0; i <= half_window_length * 2; ++i)
     waveform[i] -= window[i] * weighting_coefficient;
 
@@ -144,8 +144,8 @@ static void GetWindowedWaveform(const double *x, int x_length, int fs,
 //-----------------------------------------------------------------------------
 // AddInfinitesimalNoise()
 //-----------------------------------------------------------------------------
-static void AddInfinitesimalNoise(const double *input_spectrum, int fft_size,
-    double *output_spectrum) {
+static void AddInfinitesimalNoise(const float *input_spectrum, int fft_size,
+    float *output_spectrum) {
   for (int i = 0; i <= fft_size / 2; ++i)
     output_spectrum[i] = input_spectrum[i] + fabs(randn()) * world::kEps;
 }
@@ -156,10 +156,10 @@ static void AddInfinitesimalNoise(const double *input_spectrum, int fft_size,
 // Caution:
 //   forward_fft is allocated in advance to speed up the processing.
 //-----------------------------------------------------------------------------
-static void CheapTrickGeneralBody(const double *x, int x_length, int fs,
-    double current_f0, int fft_size, double current_position, double q1,
+static void CheapTrickGeneralBody(const float *x, int x_length, int fs,
+    float current_f0, int fft_size, float current_position, float q1,
     const ForwardRealFFT *forward_real_fft,
-    const InverseRealFFT *inverse_real_fft, double *spectral_envelope) {
+    const InverseRealFFT *inverse_real_fft, float *spectral_envelope) {
   // F0-adaptive windowing
   GetWindowedWaveform(x, x_length, fs, current_f0, current_position,
       forward_real_fft);
@@ -193,26 +193,26 @@ int GetFFTSizeForCheapTrick(int fs, const CheapTrickOption *option) {
       static_cast<int>(log(3.0 * fs / option->f0_floor + 1) / world::kLog2)));
 }
 
-double GetF0FloorForCheapTrick(int fs, int fft_size) {
+float GetF0FloorForCheapTrick(int fs, int fft_size) {
   return 3.0 * fs / (fft_size - 3.0);
 }
 
-void CheapTrick(const double *x, int x_length, int fs,
-    const double *temporal_positions, const double *f0, int f0_length,
-    const CheapTrickOption *option, double **spectrogram) {
+void CheapTrick(const float *x, int x_length, int fs,
+    const float *temporal_positions, const float *f0, int f0_length,
+    const CheapTrickOption *option, float **spectrogram) {
   int fft_size = option->fft_size;
 
   randn_reseed();
 
-  double f0_floor = GetF0FloorForCheapTrick(fs, fft_size);
-  double *spectral_envelope = new double[fft_size];
+  float f0_floor = GetF0FloorForCheapTrick(fs, fft_size);
+  float *spectral_envelope = new float[fft_size];
 
   ForwardRealFFT forward_real_fft = {0};
   InitializeForwardRealFFT(fft_size, &forward_real_fft);
   InverseRealFFT inverse_real_fft = {0};
   InitializeInverseRealFFT(fft_size, &inverse_real_fft);
 
-  double current_f0;
+  float current_f0;
   for (int i = 0; i < f0_length; ++i) {
     current_f0 = f0[i] <= f0_floor ? world::kDefaultF0 : f0[i];
     CheapTrickGeneralBody(x, x_length, fs, current_f0, fft_size,

@@ -14,8 +14,8 @@ WORLD_BEGIN_C_DECLS
 // Struct for CheapTrick
 //-----------------------------------------------------------------------------
 typedef struct {
-  double q1;
-  double f0_floor;
+  float q1;
+  float f0_floor;
   int fft_size;
 } CheapTrickOption;
 
@@ -35,9 +35,9 @@ typedef struct {
 // Output:
 //   spectrogram        : Spectrogram estimated by CheapTrick.
 //-----------------------------------------------------------------------------
-void CheapTrick(const double *x, int x_length, int fs,
-    const double *temporal_positions, const double *f0, int f0_length,
-    const CheapTrickOption *option, double **spectrogram);
+void CheapTrick(const float *x, int x_length, int fs,
+    const float *temporal_positions, const float *f0, int f0_length,
+    const CheapTrickOption *option, float **spectrogram);
 
 //-----------------------------------------------------------------------------
 // InitializeCheapTrickOption allocates the memory to the struct and sets the
@@ -77,7 +77,7 @@ int GetFFTSizeForCheapTrick(int fs, const CheapTrickOption *option);
 // Output:
 //   Lower f0 limit (Hz)
 //-----------------------------------------------------------------------------
-double GetF0FloorForCheapTrick(int fs, int fft_size);
+float GetF0FloorForCheapTrick(int fs, int fft_size);
 
 WORLD_END_C_DECLS
 

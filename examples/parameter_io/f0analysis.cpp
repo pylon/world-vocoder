@@ -43,8 +43,8 @@ void usage(char *argv) {
 //-----------------------------------------------------------------------------
 // Set parameters from command line options
 //-----------------------------------------------------------------------------
-int SetOption(int argc, char **argv, double *f0_floor, double *f0_ceil,
-    double *frame_period, char *filename, int *text_flag) {
+int SetOption(int argc, char **argv, float *f0_floor, float *f0_ceil,
+    float *frame_period, char *filename, int *text_flag) {
   while (--argc) {
     if (strcmp(argv[argc], "-f") == 0) *f0_floor = atof(argv[argc + 1]);
     if (strcmp(argv[argc], "-c") == 0) *f0_ceil = atof(argv[argc + 1]);
@@ -92,15 +92,15 @@ int main(int argc, char **argv) {
     }
     return -1;
   }
-  double *x = new double[x_length];
+  float *x = new float[x_length];
   int fs, nbit;
   wavread(argv[1], &fs, &nbit, x);
 
   // F0 analysis
   int number_of_frames =
     GetSamplesForHarvest(fs, x_length, option.frame_period);
-  double *f0 = new double[number_of_frames];
-  double *temporal_positions = new double[number_of_frames];
+  float *f0 = new float[number_of_frames];
+  float *temporal_positions = new float[number_of_frames];
   Harvest(x, x_length, fs, &option, temporal_positions, f0);
 
   // File output

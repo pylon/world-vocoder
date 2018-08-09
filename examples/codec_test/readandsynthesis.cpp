@@ -45,10 +45,10 @@ int SetOption(int argc, char **argv, char *filename) {
 }
 
 void ReadCodedAperiodicity(const char *filename, int f0_length, int fs,
-    int fft_size, int number_of_dimensions, double **aperiodicity) {
-  double **coded_aperiodicity = new double *[f0_length];
+    int fft_size, int number_of_dimensions, float **aperiodicity) {
+  float **coded_aperiodicity = new float *[f0_length];
   for (int i = 0; i < f0_length; ++i)
-    coded_aperiodicity[i] = new double[number_of_dimensions];
+    coded_aperiodicity[i] = new float[number_of_dimensions];
   ReadAperiodicity(filename, coded_aperiodicity);
   DecodeAperiodicity(coded_aperiodicity, f0_length, fs, fft_size,
       aperiodicity);
@@ -57,10 +57,10 @@ void ReadCodedAperiodicity(const char *filename, int f0_length, int fs,
 }
 
 void ReadCodedSpectralEnvelope(const char *filename, int f0_length, int fs,
-    int fft_size, int number_of_dimensions, double **spectrogram) {
-  double **coded_spectral_envelope = new double *[f0_length];
+    int fft_size, int number_of_dimensions, float **spectrogram) {
+  float **coded_spectral_envelope = new float *[f0_length];
   for (int i = 0; i < f0_length; ++i)
-    coded_spectral_envelope[i] = new double[number_of_dimensions];
+    coded_spectral_envelope[i] = new float[number_of_dimensions];
   ReadSpectralEnvelope(filename, coded_spectral_envelope);
   DecodeSpectralEnvelope(coded_spectral_envelope, f0_length, fs,
       fft_size, number_of_dimensions, spectrogram);
@@ -85,20 +85,20 @@ int main(int argc, char **argv) {
   int f0_length = static_cast<int>(GetHeaderInformation(argv[1], "NOF "));
   int fft_size = static_cast<int>(GetHeaderInformation(argv[2], "FFT "));
   int fs = static_cast<int>(GetHeaderInformation(argv[2], "FS  "));
-  double frame_period = GetHeaderInformation(argv[2], "FP  ");
+  float frame_period = GetHeaderInformation(argv[2], "FP  ");
   char filename[200] = "output.wav";
 
   // Option from command line
   if (SetOption(argc, argv, filename) == 0) return 0;
 
   // Memory allocation
-  double *f0 = new double[f0_length];
-  double *temporal_positions = new double[f0_length];
-  double **spectrogram = new double *[f0_length];
-  double **aperiodicity = new double *[f0_length];
+  float *f0 = new float[f0_length];
+  float *temporal_positions = new float[f0_length];
+  float **spectrogram = new float *[f0_length];
+  float **aperiodicity = new float *[f0_length];
   for (int i = 0; i < f0_length; ++i) {
-    spectrogram[i] = new double[fft_size / 2 + 1];
-    aperiodicity[i] = new double[fft_size / 2 + 1];
+    spectrogram[i] = new float[fft_size / 2 + 1];
+    aperiodicity[i] = new float[fft_size / 2 + 1];
   }
 
   // Read F0
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
 
   // Synthesis
   int y_length = static_cast<int>(f0_length * frame_period / 1000.0 * fs);
-  double *y = new double[y_length];
+  float *y = new float[y_length];
   Synthesis(f0, f0_length, spectrogram, aperiodicity, fft_size, frame_period,
       fs, y_length, y);
 

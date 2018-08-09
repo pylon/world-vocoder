@@ -19,8 +19,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-void cdft(int n, int isgn, double *a, int *ip, double *w);
-void rdft(int n, int isgn, double *a, int *ip, double *w);
+void cdft(int n, int isgn, float *a, int *ip, float *w);
+void rdft(int n, int isgn, float *a, int *ip, float *w);
 
 namespace {
 static void BackwardFFT(fft_plan p) {
@@ -75,7 +75,7 @@ static void ForwardFFT(fft_plan p) {
 
 fft_plan fft_plan_dft_1d(int n, fft_complex *in, fft_complex *out, int sign,
     unsigned int flags) {
-  void makewt(int nw, int *ip, double *w);
+  void makewt(int nw, int *ip, float *w);
 
   fft_plan output = {0};
   output.n = n;
@@ -85,19 +85,19 @@ fft_plan fft_plan_dft_1d(int n, fft_complex *in, fft_complex *out, int sign,
   output.c_out = out;
   output.sign = sign;
   output.flags = flags;
-  output.input = new double[n * 2];
+  output.input = new float[n * 2];
   output.ip = new int[n];
-  output.w = new double[n * 5 / 4];
+  output.w = new float[n * 5 / 4];
 
   output.ip[0] = 0;
   makewt(output.n >> 1, output.ip, output.w);
   return output;
 }
 
-fft_plan fft_plan_dft_c2r_1d(int n, fft_complex *in, double *out,
+fft_plan fft_plan_dft_c2r_1d(int n, fft_complex *in, float *out,
     unsigned int flags) {
-  void makewt(int nw, int *ip, double *w);
-  void makect(int nc, int *ip, double *c);
+  void makewt(int nw, int *ip, float *w);
+  void makect(int nc, int *ip, float *c);
 
   fft_plan output = {0};
   output.n = n;
@@ -107,9 +107,9 @@ fft_plan fft_plan_dft_c2r_1d(int n, fft_complex *in, double *out,
   output.c_out = NULL;
   output.sign = FFT_BACKWARD;
   output.flags = flags;
-  output.input = new double[n];
+  output.input = new float[n];
   output.ip = new int[n];
-  output.w = new double[n * 5 / 4];
+  output.w = new float[n * 5 / 4];
 
   output.ip[0] = 0;
   makewt(output.n >> 2, output.ip, output.w);
@@ -117,10 +117,10 @@ fft_plan fft_plan_dft_c2r_1d(int n, fft_complex *in, double *out,
   return output;
 }
 
-fft_plan fft_plan_dft_r2c_1d(int n, double *in, fft_complex *out,
+fft_plan fft_plan_dft_r2c_1d(int n, float *in, fft_complex *out,
     unsigned int flags) {
-  void makewt(int nw, int *ip, double *w);
-  void makect(int nc, int *ip, double *c);
+  void makewt(int nw, int *ip, float *w);
+  void makect(int nc, int *ip, float *c);
 
   fft_plan output = {0};
   output.n = n;
@@ -130,9 +130,9 @@ fft_plan fft_plan_dft_r2c_1d(int n, double *in, fft_complex *out,
   output.c_out = out;
   output.sign = FFT_FORWARD;
   output.flags = flags;
-  output.input = new double[n];
+  output.input = new float[n];
   output.ip = new int[n];
-  output.w = new double[n * 5 / 4];
+  output.w = new float[n * 5 / 4];
 
   output.ip[0] = 0;
   makewt(output.n >> 2, output.ip, output.w);
@@ -165,9 +165,9 @@ void fft_destroy_plan(fft_plan p) {
 // The following functions are reffered by
 // http://www.kurims.kyoto-u.ac.jp/~ooura/index.html
 
-void cdft(int n, int isgn, double *a, int *ip, double *w) {
-  void cftfsub(int n, double *a, int *ip, int nw, double *w);
-  void cftbsub(int n, double *a, int *ip, int nw, double *w);
+void cdft(int n, int isgn, float *a, int *ip, float *w) {
+  void cftfsub(int n, float *a, int *ip, int nw, float *w);
+  void cftbsub(int n, float *a, int *ip, int nw, float *w);
   int nw;
 
   nw = ip[0];
@@ -179,12 +179,12 @@ void cdft(int n, int isgn, double *a, int *ip, double *w) {
 }
 
 
-void rdft(int n, int isgn, double *a, int *ip, double *w) {
-  void cftfsub(int n, double *a, int *ip, int nw, double *w);
-  void cftbsub(int n, double *a, int *ip, int nw, double *w);
-  void rftfsub(int n, double *a, int nc, double *c);
-  void rftbsub(int n, double *a, int nc, double *c);
-  double xi;
+void rdft(int n, int isgn, float *a, int *ip, float *w) {
+  void cftfsub(int n, float *a, int *ip, int nw, float *w);
+  void cftbsub(int n, float *a, int *ip, int nw, float *w);
+  void rftfsub(int n, float *a, int nc, float *c);
+  void rftbsub(int n, float *a, int nc, float *c);
+  float xi;
 
   int nw = ip[0];
   int nc = ip[1];
@@ -211,10 +211,10 @@ void rdft(int n, int isgn, double *a, int *ip, double *w) {
   }
 }
 
-void makewt(int nw, int *ip, double *w) {
+void makewt(int nw, int *ip, float *w) {
   void makeipt(int nw, int *ip);
   int j, nwh, nw0, nw1;
-  double delta, wn4r, wk1r, wk1i, wk3r, wk3i;
+  float delta, wn4r, wk1r, wk1i, wk3r, wk3i;
 
   ip[0] = nw;
   ip[1] = 1;
@@ -288,9 +288,9 @@ void makeipt(int nw, int *ip) {
   }
 }
 
-void makect(int nc, int *ip, double *c) {
+void makect(int nc, int *ip, float *c) {
   int j, nch;
-  double delta;
+  float delta;
 
   ip[1] = nc;
   if (nc > 1) {
@@ -308,18 +308,18 @@ void makect(int nc, int *ip, double *c) {
 // -------- child routines --------
 
 
-void cftfsub(int n, double *a, int *ip, int nw, double *w) {
-  void bitrv2(int n, int *ip, double *a);
-  void bitrv216(double *a);
-  void bitrv208(double *a);
-  void cftf1st(int n, double *a, double *w);
-  void cftrec4(int n, double *a, int nw, double *w);
-  void cftleaf(int n, int isplt, double *a, int nw, double *w);
-  void cftfx41(int n, double *a, int nw, double *w);
-  void cftf161(double *a, double *w);
-  void cftf081(double *a, double *w);
-  void cftf040(double *a);
-  void cftx020(double *a);
+void cftfsub(int n, float *a, int *ip, int nw, float *w) {
+  void bitrv2(int n, int *ip, float *a);
+  void bitrv216(float *a);
+  void bitrv208(float *a);
+  void cftf1st(int n, float *a, float *w);
+  void cftrec4(int n, float *a, int nw, float *w);
+  void cftleaf(int n, int isplt, float *a, int nw, float *w);
+  void cftfx41(int n, float *a, int nw, float *w);
+  void cftf161(float *a, float *w);
+  void cftf081(float *a, float *w);
+  void cftf040(float *a);
+  void cftx020(float *a);
 
   if (n > 8) {
     if (n > 32) {
@@ -346,18 +346,18 @@ void cftfsub(int n, double *a, int *ip, int nw, double *w) {
   }
 }
 
-void cftbsub(int n, double *a, int *ip, int nw, double *w) {
-  void bitrv2conj(int n, int *ip, double *a);
-  void bitrv216neg(double *a);
-  void bitrv208neg(double *a);
-  void cftb1st(int n, double *a, double *w);
-  void cftrec4(int n, double *a, int nw, double *w);
-  void cftleaf(int n, int isplt, double *a, int nw, double *w);
-  void cftfx41(int n, double *a, int nw, double *w);
-  void cftf161(double *a, double *w);
-  void cftf081(double *a, double *w);
-  void cftb040(double *a);
-  void cftx020(double *a);
+void cftbsub(int n, float *a, int *ip, int nw, float *w) {
+  void bitrv2conj(int n, int *ip, float *a);
+  void bitrv216neg(float *a);
+  void bitrv208neg(float *a);
+  void cftb1st(int n, float *a, float *w);
+  void cftrec4(int n, float *a, int nw, float *w);
+  void cftleaf(int n, int isplt, float *a, int nw, float *w);
+  void cftfx41(int n, float *a, int nw, float *w);
+  void cftf161(float *a, float *w);
+  void cftf081(float *a, float *w);
+  void cftb040(float *a);
+  void cftx020(float *a);
 
   if (n > 8) {
     if (n > 32) {
@@ -384,9 +384,9 @@ void cftbsub(int n, double *a, int *ip, int nw, double *w) {
   }
 }
 
-void bitrv2(int n, int *ip, double *a) {
+void bitrv2(int n, int *ip, float *a) {
   int j, j1, k, k1, l, m, nh, nm;
-  double xr, xi, yr, yi;
+  float xr, xi, yr, yi;
 
   m = 1;
   for (l = n >> 2; l > 8; l >>= 2) {
@@ -729,9 +729,9 @@ void bitrv2(int n, int *ip, double *a) {
   }
 }
 
-void bitrv2conj(int n, int *ip, double *a) {
+void bitrv2conj(int n, int *ip, float *a) {
   int j, j1, k, k1, l, m, nh, nm;
-  double xr, xi, yr, yi;
+  float xr, xi, yr, yi;
 
   m = 1;
   for (l = n >> 2; l > 8; l >>= 2) {
@@ -1082,8 +1082,8 @@ void bitrv2conj(int n, int *ip, double *a) {
   }
 }
 
-void bitrv216(double *a) {
-  double x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i,
+void bitrv216(float *a) {
+  float x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i,
     x5r, x5i, x7r, x7i, x8r, x8i, x10r, x10i,
     x11r, x11i, x12r, x12i, x13r, x13i, x14r, x14i;
 
@@ -1138,8 +1138,8 @@ void bitrv216(double *a) {
 }
 
 
-void bitrv216neg(double *a) {
-  double x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i,
+void bitrv216neg(float *a) {
+  float x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i,
     x5r, x5i, x6r, x6i, x7r, x7i, x8r, x8i,
     x9r, x9i, x10r, x10i, x11r, x11i, x12r, x12i,
     x13r, x13i, x14r, x14i, x15r, x15i;
@@ -1206,8 +1206,8 @@ void bitrv216neg(double *a) {
   a[31] = x8i;
 }
 
-void bitrv208(double *a) {
-  double x1r, x1i, x3r, x3i, x4r, x4i, x6r, x6i;
+void bitrv208(float *a) {
+  float x1r, x1i, x3r, x3i, x4r, x4i, x6r, x6i;
 
   x1r = a[2];
   x1i = a[3];
@@ -1227,8 +1227,8 @@ void bitrv208(double *a) {
   a[13] = x3i;
 }
 
-void bitrv208neg(double *a) {
-  double x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i,
+void bitrv208neg(float *a) {
+  float x1r, x1i, x2r, x2i, x3r, x3i, x4r, x4i,
     x5r, x5i, x6r, x6i, x7r, x7i;
 
   x1r = a[2];
@@ -1261,11 +1261,11 @@ void bitrv208neg(double *a) {
   a[15] = x4i;
 }
 
-void cftf1st(int n, double *a, double *w) {
+void cftf1st(int n, float *a, float *w) {
   int j, j0, j1, j2, j3, k, m, mh;
-  double wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i,
+  float wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i,
     wd1r, wd1i, wd3r, wd3i;
-  double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i,
+  float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i,
     y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i;
 
   mh = n >> 3;
@@ -1465,11 +1465,11 @@ void cftf1st(int n, double *a, double *w) {
   a[j3 + 3] = wk3i * x0i - wk3r * x0r;
 }
 
-void cftb1st(int n, double *a, double *w) {
+void cftb1st(int n, float *a, float *w) {
   int j, j0, j1, j2, j3, k, m, mh;
-  double wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i,
+  float wn4r, csc1, csc3, wk1r, wk1i, wk3r, wk3i,
     wd1r, wd1i, wd3r, wd3i;
-  double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i,
+  float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i,
     y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i;
 
   mh = n >> 3;
@@ -1669,10 +1669,10 @@ void cftb1st(int n, double *a, double *w) {
   a[j3 + 3] = wk3i * x0i - wk3r * x0r;
 }
 
-void cftrec4(int n, double *a, int nw, double *w) {
-  int cfttree(int n, int j, int k, double *a, int nw, double *w);
-  void cftleaf(int n, int isplt, double *a, int nw, double *w);
-  void cftmdl1(int n, double *a, double *w);
+void cftrec4(int n, float *a, int nw, float *w) {
+  int cfttree(int n, int j, int k, float *a, int nw, float *w);
+  void cftleaf(int n, int isplt, float *a, int nw, float *w);
+  void cftmdl1(int n, float *a, float *w);
   int isplt, j, k, m;
 
   m = n;
@@ -1689,9 +1689,9 @@ void cftrec4(int n, double *a, int nw, double *w) {
   }
 }
 
-int cfttree(int n, int j, int k, double *a, int nw, double *w) {
-  void cftmdl1(int n, double *a, double *w);
-  void cftmdl2(int n, double *a, double *w);
+int cfttree(int n, int j, int k, float *a, int nw, float *w) {
+  void cftmdl1(int n, float *a, float *w);
+  void cftmdl2(int n, float *a, float *w);
   int i, isplt, m;
 
   if ((k & 3) != 0) {
@@ -1722,13 +1722,13 @@ int cfttree(int n, int j, int k, double *a, int nw, double *w) {
   return isplt;
 }
 
-void cftleaf(int n, int isplt, double *a, int nw, double *w) {
-  void cftmdl1(int n, double *a, double *w);
-  void cftmdl2(int n, double *a, double *w);
-  void cftf161(double *a, double *w);
-  void cftf162(double *a, double *w);
-  void cftf081(double *a, double *w);
-  void cftf082(double *a, double *w);
+void cftleaf(int n, int isplt, float *a, int nw, float *w) {
+  void cftmdl1(int n, float *a, float *w);
+  void cftmdl2(int n, float *a, float *w);
+  void cftf161(float *a, float *w);
+  void cftf162(float *a, float *w);
+  void cftf081(float *a, float *w);
+  void cftf082(float *a, float *w);
 
   if (n == 512) {
     cftmdl1(128, a, &w[nw - 64]);
@@ -1785,10 +1785,10 @@ void cftleaf(int n, int isplt, double *a, int nw, double *w) {
   }
 }
 
-void cftmdl1(int n, double *a, double *w) {
+void cftmdl1(int n, float *a, float *w) {
   int j, j0, j1, j2, j3, k, m, mh;
-  double wn4r, wk1r, wk1i, wk3r, wk3i;
-  double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
+  float wn4r, wk1r, wk1i, wk3r, wk3i;
+  float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
 
   mh = n >> 3;
   m = 2 * mh;
@@ -1893,10 +1893,10 @@ void cftmdl1(int n, double *a, double *w) {
   a[j3 + 1] = -wn4r * (x0i - x0r);
 }
 
-void cftmdl2(int n, double *a, double *w) {
+void cftmdl2(int n, float *a, float *w) {
   int j, j0, j1, j2, j3, k, kr, m, mh;
-  double wn4r, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
-  double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y2r, y2i;
+  float wn4r, wk1r, wk1i, wk3r, wk3i, wd1r, wd1i, wd3r, wd3i;
+  float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i, y0r, y0i, y2r, y2i;
 
   mh = n >> 3;
   m = 2 * mh;
@@ -2025,11 +2025,11 @@ void cftmdl2(int n, double *a, double *w) {
   a[j3 + 1] = y0i + y2i;
 }
 
-void cftfx41(int n, double *a, int nw, double *w) {
-  void cftf161(double *a, double *w);
-  void cftf162(double *a, double *w);
-  void cftf081(double *a, double *w);
-  void cftf082(double *a, double *w);
+void cftfx41(int n, float *a, int nw, float *w) {
+  void cftf161(float *a, float *w);
+  void cftf162(float *a, float *w);
+  void cftf081(float *a, float *w);
+  void cftf082(float *a, float *w);
 
   if (n == 128) {
     cftf161(a, &w[nw - 8]);
@@ -2044,8 +2044,8 @@ void cftfx41(int n, double *a, int nw, double *w) {
   }
 }
 
-void cftf161(double *a, double *w) {
-  double wn4r, wk1r, wk1i,
+void cftf161(float *a, float *w) {
+  float wn4r, wk1r, wk1i,
     x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i,
     y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i,
     y4r, y4i, y5r, y5i, y6r, y6i, y7r, y7i,
@@ -2201,8 +2201,8 @@ void cftf161(double *a, double *w) {
   a[7] = x1i - x3r;
 }
 
-void cftf162(double *a, double *w) {
-  double wn4r, wk1r, wk1i, wk2r, wk2i, wk3r, wk3i,
+void cftf162(float *a, float *w) {
+  float wn4r, wk1r, wk1i, wk2r, wk2i, wk3r, wk3i,
     x0r, x0i, x1r, x1i, x2r, x2i,
     y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i,
     y4r, y4i, y5r, y5i, y6r, y6i, y7r, y7i,
@@ -2382,8 +2382,8 @@ void cftf162(double *a, double *w) {
   a[31] = x1i - x2r;
 }
 
-void cftf081(double *a, double *w) {
-  double wn4r, x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i,
+void cftf081(float *a, float *w) {
+  float wn4r, x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i,
     y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i,
     y4r, y4i, y5r, y5i, y6r, y6i, y7r, y7i;
 
@@ -2442,8 +2442,8 @@ void cftf081(double *a, double *w) {
   a[7] = y2i - y6r;
 }
 
-void cftf082(double *a, double *w) {
-  double wn4r, wk1r, wk1i, x0r, x0i, x1r, x1i,
+void cftf082(float *a, float *w) {
+  float wn4r, wk1r, wk1i, x0r, x0i, x1r, x1i,
     y0r, y0i, y1r, y1i, y2r, y2i, y3r, y3i,
     y4r, y4i, y5r, y5i, y6r, y6i, y7r, y7i;
 
@@ -2513,8 +2513,8 @@ void cftf082(double *a, double *w) {
 }
 
 
-void cftf040(double *a) {
-  double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
+void cftf040(float *a) {
+  float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
 
   x0r = a[0] + a[4];
   x0i = a[1] + a[5];
@@ -2534,8 +2534,8 @@ void cftf040(double *a) {
   a[7] = x1i - x3r;
 }
 
-void cftb040(double *a) {
-  double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
+void cftb040(float *a) {
+  float x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
 
   x0r = a[0] + a[4];
   x0i = a[1] + a[5];
@@ -2555,8 +2555,8 @@ void cftb040(double *a) {
   a[7] = x1i + x3r;
 }
 
-void cftx020(double *a) {
-  double x0r, x0i;
+void cftx020(float *a) {
+  float x0r, x0i;
 
   x0r = a[0] - a[2];
   x0i = a[1] - a[3];
@@ -2566,9 +2566,9 @@ void cftx020(double *a) {
   a[3] = x0i;
 }
 
-void rftfsub(int n, double *a, int nc, double *c) {
+void rftfsub(int n, float *a, int nc, float *c) {
   int j, k, kk, ks, m;
-  double wkr, wki, xr, xi, yr, yi;
+  float wkr, wki, xr, xi, yr, yi;
 
   m = n >> 1;
   ks = 2 * nc / m;
@@ -2589,9 +2589,9 @@ void rftfsub(int n, double *a, int nc, double *c) {
   }
 }
 
-void rftbsub(int n, double *a, int nc, double *c) {
+void rftbsub(int n, float *a, int nc, float *c) {
   int j, k, kk, ks, m;
-  double wkr, wki, xr, xi, yr, yi;
+  float wkr, wki, xr, xi, yr, yi;
 
   m = n >> 1;
   ks = 2 * nc / m;
@@ -2612,9 +2612,9 @@ void rftbsub(int n, double *a, int nc, double *c) {
   }
 }
 
-void dctsub(int n, double *a, int nc, double *c) {
+void dctsub(int n, float *a, int nc, float *c) {
   int j, k, kk, ks, m;
-  double wkr, wki, xr;
+  float wkr, wki, xr;
 
   m = n >> 1;
   ks = nc / n;
@@ -2631,9 +2631,9 @@ void dctsub(int n, double *a, int nc, double *c) {
   a[m] *= c[0];
 }
 
-void dstsub(int n, double *a, int nc, double *c) {
+void dstsub(int n, float *a, int nc, float *c) {
   int j, k, kk, ks, m;
-  double wkr, wki, xr;
+  float wkr, wki, xr;
 
   m = n >> 1;
   ks = nc / n;

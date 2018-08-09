@@ -21,8 +21,8 @@ extern "C" {
 //   f0                 : F0 contour
 //   text_flag          : The file is written as text (NOT binary).
 //-----------------------------------------------------------------------------
-void WriteF0(const char *filename, int f0_length, double frame_period,
-  const double *temporal_positions, const double *f0, int text_flag);
+void WriteF0(const char *filename, int f0_length, float frame_period,
+  const float *temporal_positions, const float *f0, int text_flag);
 
 //-----------------------------------------------------------------------------
 // ReadF0() reads the F0 contour from a file..
@@ -36,7 +36,7 @@ void WriteF0(const char *filename, int f0_length, double frame_period,
 //
 // Note: Memory must be allocated before calling this function.
 //-----------------------------------------------------------------------------
-int ReadF0(const char *filename, double *temporal_positions, double *f0);
+int ReadF0(const char *filename, float *temporal_positions, float *f0);
 
 //-----------------------------------------------------------------------------
 // GetHeaderInformation() reads a parameter from a file.
@@ -45,7 +45,7 @@ int ReadF0(const char *filename, double *temporal_positions, double *f0);
 //   filename             : Filename used for file output
 //   parameter            : Required parameter
 //                        : "NOF ": number of samples (int)
-//                        : "FP  ": frame shift (double)
+//                        : "FP  ": frame shift (float)
 //                        : "FFT ": FFT size (int)
 //                        : "NOD ": number of dimensions (int)
 //                        : "FS  ": sampling frequency
@@ -53,7 +53,7 @@ int ReadF0(const char *filename, double *temporal_positions, double *f0);
 // Note: F0 does not include "FFT ", "NOD ", and "FS  ".
 //       These are ignored in cases where they are used for F0 file.
 //-----------------------------------------------------------------------------
-double GetHeaderInformation(const char *filename, const char *parameter);
+float GetHeaderInformation(const char *filename, const char *parameter);
 
 //-----------------------------------------------------------------------------
 // WriteSpectralEnvelope() writes the spectral envelope.
@@ -68,8 +68,8 @@ double GetHeaderInformation(const char *filename, const char *parameter);
 //   spectrogram          : Spectral envelope estimated by CheapTrick
 //-----------------------------------------------------------------------------
 void WriteSpectralEnvelope(const char *filename, int fs, int f0_length,
-  double frame_period, int fft_size, int number_of_dimensions,
-  const double * const *spectrogram);
+  float frame_period, int fft_size, int number_of_dimensions,
+  const float * const *spectrogram);
 
 //-----------------------------------------------------------------------------
 // ReadSpectralEnvelope() reads the spectral envelope from a file.
@@ -82,7 +82,7 @@ void WriteSpectralEnvelope(const char *filename, int fs, int f0_length,
 //
 // Note: Memory must be allocated before calling this function.
 //-----------------------------------------------------------------------------
-int ReadSpectralEnvelope(const char *filename, double **spectrogram);
+int ReadSpectralEnvelope(const char *filename, float **spectrogram);
 
 //-----------------------------------------------------------------------------
 // WriteAperiodicity() writes the aperiodicity.
@@ -97,8 +97,8 @@ int ReadSpectralEnvelope(const char *filename, double **spectrogram);
 //   spectrogram          : Spectral envelope estimated by CheapTrick
 //-----------------------------------------------------------------------------
 void WriteAperiodicity(const char *filename, int fs, int f0_length,
-  double frame_period, int fft_size, int number_of_dimensions,
-  const double * const *aperiodicity);
+  float frame_period, int fft_size, int number_of_dimensions,
+  const float * const *aperiodicity);
 
 //-----------------------------------------------------------------------------
 // ReadAperiodicity() reads the aperiodicity from a file.
@@ -111,7 +111,7 @@ void WriteAperiodicity(const char *filename, int fs, int f0_length,
 //
 // Note: Memory must be allocated before calling this function.
 //-----------------------------------------------------------------------------
-int ReadAperiodicity(const char *filename, double **aperiodicity);
+int ReadAperiodicity(const char *filename, float **aperiodicity);
 
 #ifdef __cplusplus
 }

@@ -65,15 +65,15 @@ DWORD timeGetTime() {
 // Users are NOT forced to use this struct.
 //-----------------------------------------------------------------------------
 typedef struct {
-  double frame_period;
+  float frame_period;
   int fs;
 
-  double *f0;
-  double *time_axis;
+  float *f0;
+  float *time_axis;
   int f0_length;
 
-  double **spectrogram;
-  double **aperiodicity;
+  float **spectrogram;
+  float **aperiodicity;
   int fft_size;
 } WorldParameters;
 
@@ -83,10 +83,10 @@ void DisplayInformation(int fs, int nbit, int x_length) {
   printf("File information\n");
   printf("Sampling : %d Hz %d Bit\n", fs, nbit);
   printf("Length %d [sample]\n", x_length);
-  printf("Length %f [sec]\n", static_cast<double>(x_length) / fs);
+  printf("Length %f [sec]\n", static_cast<float>(x_length) / fs);
 }
 
-void F0EstimationDio(double *x, int x_length,
+void F0EstimationDio(float *x, int x_length,
     WorldParameters *world_parameters) {
   DioOption option = {0};
   InitializeDioOption(&option);
@@ -110,9 +110,9 @@ void F0EstimationDio(double *x, int x_length,
   // Parameters setting and memory allocation.
   world_parameters->f0_length = GetSamplesForDIO(world_parameters->fs,
     x_length, world_parameters->frame_period);
-  world_parameters->f0 = new double[world_parameters->f0_length];
-  world_parameters->time_axis = new double[world_parameters->f0_length];
-  double *refined_f0 = new double[world_parameters->f0_length];
+  world_parameters->f0 = new float[world_parameters->f0_length];
+  world_parameters->time_axis = new float[world_parameters->f0_length];
+  float *refined_f0 = new float[world_parameters->f0_length];
 
   printf("\nAnalysis\n");
   DWORD elapsed_time = timeGetTime();
@@ -132,7 +132,7 @@ void F0EstimationDio(double *x, int x_length,
   delete[] refined_f0;
 }
 
-void F0EstimationHarvest(double *x, int x_length,
+void F0EstimationHarvest(float *x, int x_length,
     WorldParameters *world_parameters) {
   HarvestOption option = { 0 };
   InitializeHarvestOption(&option);
@@ -147,8 +147,8 @@ void F0EstimationHarvest(double *x, int x_length,
   // Parameters setting and memory allocation.
   world_parameters->f0_length = GetSamplesForHarvest(world_parameters->fs,
     x_length, world_parameters->frame_period);
-  world_parameters->f0 = new double[world_parameters->f0_length];
-  world_parameters->time_axis = new double[world_parameters->f0_length];
+  world_parameters->f0 = new float[world_parameters->f0_length];
+  world_parameters->time_axis = new float[world_parameters->f0_length];
 
   printf("\nAnalysis\n");
   DWORD elapsed_time = timeGetTime();
@@ -157,7 +157,7 @@ void F0EstimationHarvest(double *x, int x_length,
   printf("Harvest: %d [msec]\n", timeGetTime() - elapsed_time);
 }
 
-void SpectralEnvelopeEstimation(double *x, int x_length,
+void SpectralEnvelopeEstimation(float *x, int x_length,
     WorldParameters *world_parameters) {
   CheapTrickOption option = {0};
   // Note (2017/01/02): fs is added as an argument.
@@ -180,10 +180,10 @@ void SpectralEnvelopeEstimation(double *x, int x_length,
 
   // Parameters setting and memory allocation.
   world_parameters->fft_size = option.fft_size;
-  world_parameters->spectrogram = new double *[world_parameters->f0_length];
+  world_parameters->spectrogram = new float *[world_parameters->f0_length];
   for (int i = 0; i < world_parameters->f0_length; ++i)
     world_parameters->spectrogram[i] =
-      new double[world_parameters->fft_size / 2 + 1];
+      new float[world_parameters->fft_size / 2 + 1];
 
   DWORD elapsed_time = timeGetTime();
   CheapTrick(x, x_length, world_parameters->fs, world_parameters->time_axis,
@@ -192,7 +192,7 @@ void SpectralEnvelopeEstimation(double *x, int x_length,
   printf("CheapTrick: %d [msec]\n", timeGetTime() - elapsed_time);
 }
 
-void AperiodicityEstimation(double *x, int x_length,
+void AperiodicityEstimation(float *x, int x_length,
     WorldParameters *world_parameters) {
   D4COption option = {0};
   InitializeD4COption(&option);
@@ -206,10 +206,10 @@ void AperiodicityEstimation(double *x, int x_length,
   option.threshold = 0.85;
 
   // Parameters setting and memory allocation.
-  world_parameters->aperiodicity = new double *[world_parameters->f0_length];
+  world_parameters->aperiodicity = new float *[world_parameters->f0_length];
   for (int i = 0; i < world_parameters->f0_length; ++i)
     world_parameters->aperiodicity[i] =
-      new double[world_parameters->fft_size / 2 + 1];
+      new float[world_parameters->fft_size / 2 + 1];
 
   DWORD elapsed_time = timeGetTime();
   D4C(x, x_length, world_parameters->fs, world_parameters->time_axis,
@@ -219,24 +219,24 @@ void AperiodicityEstimation(double *x, int x_length,
 }
 
 void ParameterModification(int argc, char *argv[], int fs, int f0_length,
-    int fft_size, double *f0, double **spectrogram) {
+    int fft_size, float *f0, float **spectrogram) {
   // F0 scaling
   if (argc >= 4) {
-    double shift = atof(argv[3]);
+    float shift = atof(argv[3]);
     for (int i = 0; i < f0_length; ++i) f0[i] *= shift;
   }
   if (argc < 5) return;
 
   // Spectral stretching
-  double ratio = atof(argv[4]);
-  double *freq_axis1 = new double[fft_size];
-  double *freq_axis2 = new double[fft_size];
-  double *spectrum1 = new double[fft_size];
-  double *spectrum2 = new double[fft_size];
+  float ratio = atof(argv[4]);
+  float *freq_axis1 = new float[fft_size];
+  float *freq_axis2 = new float[fft_size];
+  float *spectrum1 = new float[fft_size];
+  float *spectrum2 = new float[fft_size];
 
   for (int i = 0; i <= fft_size / 2; ++i) {
     freq_axis1[i] = ratio * i / fft_size * fs;
-    freq_axis2[i] = static_cast<double>(i) / fft_size * fs;
+    freq_axis2[i] = static_cast<float>(i) / fft_size * fs;
   }
   for (int i = 0; i < f0_length; ++i) {
     for (int j = 0; j <= fft_size / 2; ++j)
@@ -258,7 +258,7 @@ void ParameterModification(int argc, char *argv[], int fs, int f0_length,
 }
 
 void WaveformSynthesis(WorldParameters *world_parameters, int fs,
-    int y_length, double *y) {
+    int y_length, float *y) {
   DWORD elapsed_time;
   // Synthesis by the aperiodicity
   printf("\nSynthesis 1 (conventional algorithm)\n");
@@ -271,7 +271,7 @@ void WaveformSynthesis(WorldParameters *world_parameters, int fs,
 }
 
 void WaveformSynthesis2(WorldParameters *world_parameters, int fs,
-    int y_length, double *y) {
+    int y_length, float *y) {
   DWORD elapsed_time;
   printf("\nSynthesis 2 (All frames are added at the same time)\n");
   elapsed_time = timeGetTime();
@@ -298,7 +298,7 @@ void WaveformSynthesis2(WorldParameters *world_parameters, int fs,
 }
 
 void WaveformSynthesis3(WorldParameters *world_parameters, int fs,
-    int y_length, double *y) {
+    int y_length, float *y) {
   DWORD elapsed_time;
   // Synthesis by the aperiodicity
   printf("\nSynthesis 3 (Ring buffer is efficiently used.)\n");
@@ -373,7 +373,7 @@ int main(int argc, char *argv[]) {
     else printf("error: The file is not .wav format.\n");
     return -1;
   }
-  double *x = new double[x_length];
+  float *x = new float[x_length];
   // wavread() must be called after GetAudioLength().
   int fs, nbit;
   wavread(argv[1], &fs, &nbit, x);
@@ -417,7 +417,7 @@ int main(int argc, char *argv[]) {
   // The length of the output waveform
   int y_length = static_cast<int>((world_parameters.f0_length - 1) *
     world_parameters.frame_period / 1000.0 * fs) + 1;
-  double *y = new double[y_length];
+  float *y = new float[y_length];
 
   // Synthesis 1 (conventional synthesis)
   for (int i = 0; i < y_length; ++i) y[i] = 0.0;

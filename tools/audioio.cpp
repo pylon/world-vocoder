@@ -112,7 +112,7 @@ static int GetParameters(FILE *fp, int *fs, int *nbit, int *wav_length) {
 
 }  // namespace
 
-void wavwrite(const double *x, int x_length, int fs, int nbit,
+void wavwrite(const float *x, int x_length, int fs, int nbit,
     const char *filename) {
   FILE *fp = fopen(filename, "wb");
   if (NULL == fp) {
@@ -214,7 +214,7 @@ int GetAudioLength(const char *filename) {
   return wav_length;
 }
 
-void wavread(const char* filename, int *fs, int *nbit, double *x) {
+void wavread(const char* filename, int *fs, int *nbit, float *x) {
   FILE *fp = fopen(filename, "rb");
   if (NULL == fp) {
     printf("File not found.\n");
@@ -233,8 +233,8 @@ void wavread(const char* filename, int *fs, int *nbit, double *x) {
   }
 
   int quantization_byte = *nbit / 8;
-  double zero_line = pow(2.0, *nbit - 1);
-  double tmp, sign_bias;
+  float zero_line = pow(2.0, *nbit - 1);
+  float tmp, sign_bias;
   unsigned char for_int_number[4];
   for (int i = 0; i < x_length; ++i) {
     sign_bias = tmp = 0.0;

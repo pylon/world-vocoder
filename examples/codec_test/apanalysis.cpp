@@ -45,7 +45,7 @@ void usage(char *argv) {
 //-----------------------------------------------------------------------------
 // Set parameters from command line options
 //-----------------------------------------------------------------------------
-int SetOption(int argc, char **argv, int *fft_size, double *threshold,
+int SetOption(int argc, char **argv, int *fft_size, float *threshold,
     int *compression_flag, char *filename) {
   while (--argc) {
     if (strcmp(argv[argc], "-f") == 0) *fft_size = atoi(argv[argc + 1]);
@@ -65,12 +65,12 @@ int SetOption(int argc, char **argv, int *fft_size, double *threshold,
 // Write coded aperiodicity
 //-----------------------------------------------------------------------------
 void WriteCodedAperiodicity(const char *filename,
-    const double * const *aperiodicity, int fs, int f0_length,
-    double frame_period, int fft_size) {
+    const float * const *aperiodicity, int fs, int f0_length,
+    float frame_period, int fft_size) {
   int number_of_aperiodicities = GetNumberOfAperiodicities(fs);
-  double **coded_aperiodicity = new double *[f0_length];
+  float **coded_aperiodicity = new float *[f0_length];
   for (int i = 0; i < f0_length; ++i)
-    coded_aperiodicity[i] = new double[number_of_aperiodicities];
+    coded_aperiodicity[i] = new float[number_of_aperiodicities];
 
   CodeAperiodicity(aperiodicity, f0_length, fs, fft_size,
     coded_aperiodicity);
@@ -97,9 +97,9 @@ int main(int argc, char **argv) {
 
   // Read F0 information
   int f0_length = static_cast<int>(GetHeaderInformation(argv[2], "NOF "));
-  double frame_period = GetHeaderInformation(argv[2], "FP  ");
-  double *f0 = new double[f0_length];
-  double *temporal_positions = new double[f0_length];
+  float frame_period = GetHeaderInformation(argv[2], "FP  ");
+  float *f0 = new float[f0_length];
+  float *temporal_positions = new float[f0_length];
   ReadF0(argv[2], temporal_positions, f0);
 
   // Read an audio file
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
     }
     return -1;
   }
-  double *x = new double[x_length];
+  float *x = new float[x_length];
   int fs, nbit;
   wavread(argv[1], &fs, &nbit, x);
 
@@ -131,9 +131,9 @@ int main(int argc, char **argv) {
     filename) == 0) return 0;
 
   // Aperiodicity analysis
-  double **aperiodicity = new double *[f0_length];
+  float **aperiodicity = new float *[f0_length];
   for (int i = 0; i < f0_length; ++i)
-    aperiodicity[i] = new double[fft_size / 2 + 1];
+    aperiodicity[i] = new float[fft_size / 2 + 1];
   D4C(x, x_length, fs, temporal_positions, f0, f0_length, fft_size,
       &option, aperiodicity);
 

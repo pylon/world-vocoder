@@ -46,7 +46,7 @@ void usage(char *argv) {
 //-----------------------------------------------------------------------------
 // Set parameters from command line options
 //-----------------------------------------------------------------------------
-int SetOption(int argc, char **argv, int *fft_size, double *q1,
+int SetOption(int argc, char **argv, int *fft_size, float *q1,
     int *number_of_dimensions, char *filename) {
   while (--argc) {
     if (strcmp(argv[argc], "-f") == 0) *fft_size = atoi(argv[argc + 1]);
@@ -79,9 +79,9 @@ int main(int argc, char **argv) {
 
   // Read F0 information
   int f0_length = static_cast<int>(GetHeaderInformation(argv[2], "NOF "));
-  double frame_period = GetHeaderInformation(argv[2], "FP  ");
-  double *f0 = new double[f0_length];
-  double *temporal_positions = new double[f0_length];
+  float frame_period = GetHeaderInformation(argv[2], "FP  ");
+  float *f0 = new float[f0_length];
+  float *temporal_positions = new float[f0_length];
   ReadF0(argv[2], temporal_positions, f0);
 
   // Read an audio file
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     }
     return -1;
   }
-  double *x = new double[x_length];
+  float *x = new float[x_length];
   int fs, nbit;
   wavread(argv[1], &fs, &nbit, x);
 
@@ -109,9 +109,9 @@ int main(int argc, char **argv) {
     &number_of_dimensions, filename) == 0) return -1;
 
   // Spectral envelope analysis
-  double **spectrogram = new double *[f0_length];
+  float **spectrogram = new float *[f0_length];
   for (int i = 0; i < f0_length; ++i)
-    spectrogram[i] = new double[option.fft_size / 2 + 1];
+    spectrogram[i] = new float[option.fft_size / 2 + 1];
   CheapTrick(x, x_length, fs, temporal_positions, f0, f0_length, &option,
       spectrogram);
 

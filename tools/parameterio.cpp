@@ -13,7 +13,7 @@
 
 namespace {
 static void WriteOneParameter(FILE *fp, const char *text,
-    double parameter, int size) {
+    float parameter, int size) {
   fwrite(text, 1, 4, fp);
   if (size == 4) {
     int parameter_int = static_cast<int>(parameter);
@@ -56,8 +56,8 @@ static int CheckHeader(FILE *fp, const char *text) {
 
 }  // namespace
 
-void WriteF0(const char *filename, int f0_length, double frame_period,
-    const double *temporal_positions, const double *f0, int text_flag) {
+void WriteF0(const char *filename, int f0_length, float frame_period,
+    const float *temporal_positions, const float *f0, int text_flag) {
   if (text_flag == 1) {
     FILE *fp = fopen(filename, "w");
     if (NULL == fp) {
@@ -87,7 +87,7 @@ void WriteF0(const char *filename, int f0_length, double frame_period,
   }
 }
 
-int ReadF0(const char *filename, double *temporal_positions, double *f0) {
+int ReadF0(const char *filename, float *temporal_positions, float *f0) {
   FILE *fp = fopen(filename, "rb");
   if (NULL == fp) {
     printf("File cannot be opened.\n");
@@ -104,7 +104,7 @@ int ReadF0(const char *filename, double *temporal_positions, double *f0) {
   fread(&number_of_frames, 4, 1, fp);
 
   fread(data_check, 1, 4, fp);  // "FP  "
-  double frame_period;
+  float frame_period;
   fread(&frame_period, 8, 1, fp);
 
   // Data
@@ -116,7 +116,7 @@ int ReadF0(const char *filename, double *temporal_positions, double *f0) {
   return 1;
 }
 
-double GetHeaderInformation(const char *filename, const char *parameter) {
+float GetHeaderInformation(const char *filename, const char *parameter) {
   FILE *fp = fopen(filename, "rb");
   if (NULL == fp) {
     printf("File cannot be opened.\n");
@@ -129,7 +129,7 @@ double GetHeaderInformation(const char *filename, const char *parameter) {
     fread(data_check, 1, 4, fp);
     if (0 != strcmp(data_check, parameter)) continue;
     if (0 == strcmp(parameter, "FP  ")) {
-      double answer;
+      float answer;
       fread(&answer, 8, 1, fp);
       fclose(fp);
       return answer;
@@ -137,15 +137,15 @@ double GetHeaderInformation(const char *filename, const char *parameter) {
       int answer;
       fread(&answer, 4, 1, fp);
       fclose(fp);
-      return static_cast<double>(answer);
+      return static_cast<float>(answer);
     }
   }
   return 0;
 }
 
 void WriteSpectralEnvelope(const char *filename, int fs, int f0_length,
-    double frame_period, int fft_size, int number_of_dimensions,
-    const double * const *spectrogram) {
+    float frame_period, int fft_size, int number_of_dimensions,
+    const float * const *spectrogram) {
   FILE *fp = fopen(filename, "wb");
   if (NULL == fp) {
     printf("File cannot be opened.\n");
@@ -171,7 +171,7 @@ void WriteSpectralEnvelope(const char *filename, int fs, int f0_length,
   fclose(fp);
 }
 
-int ReadSpectralEnvelope(const char *filename, double **spectrogram) {
+int ReadSpectralEnvelope(const char *filename, float **spectrogram) {
   FILE *fp = fopen(filename, "rb");
   if (NULL == fp) {
     printf("File cannot be opened.\n");
@@ -194,8 +194,8 @@ int ReadSpectralEnvelope(const char *filename, double **spectrogram) {
 }
 
 void WriteAperiodicity(const char *filename, int fs, int f0_length,
-    double frame_period, int fft_size, int number_of_dimensions,
-    const double * const *aperiodicity) {
+    float frame_period, int fft_size, int number_of_dimensions,
+    const float * const *aperiodicity) {
   FILE *fp = fopen(filename, "wb");
   if (NULL == fp) {
     printf("File cannot be opened.\n");
@@ -220,7 +220,7 @@ void WriteAperiodicity(const char *filename, int fs, int f0_length,
   fclose(fp);
 }
 
-int ReadAperiodicity(const char *filename, double **aperiodicity) {
+int ReadAperiodicity(const char *filename, float **aperiodicity) {
   FILE *fp = fopen(filename, "rb");
   if (NULL == fp) {
     printf("File cannot be opened.\n");

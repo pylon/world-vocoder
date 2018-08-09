@@ -17,7 +17,7 @@ WORLD_BEGIN_C_DECLS
 // Forward FFT in the real sequence
 typedef struct {
   int fft_size;
-  double *waveform;
+  float *waveform;
   fft_complex *spectrum;
   fft_plan forward_fft;
 } ForwardRealFFT;
@@ -25,7 +25,7 @@ typedef struct {
 // Inverse FFT in the real sequence
 typedef struct {
   int fft_size;
-  double *waveform;
+  float *waveform;
   fft_complex *spectrum;
   fft_plan inverse_fft;
 } InverseRealFFT;
@@ -41,7 +41,7 @@ typedef struct {
 // Minimum phase analysis from logarithmic power spectrum
 typedef struct {
   int fft_size;
-  double *log_spectrum;
+  float *log_spectrum;
   fft_complex *minimum_phase_spectrum;
   fft_complex *cepstrum;
   fft_plan inverse_fft;
@@ -63,13 +63,13 @@ int GetSuitableFFTSize(int sample);
 
 //-----------------------------------------------------------------------------
 // These four functions are simple max() and min() function
-// for "int" and "double" type.
+// for "int" and "float" type.
 //-----------------------------------------------------------------------------
 inline int MyMaxInt(int x, int y) {
   return x > y ? x : y;
 }
 
-inline double MyMaxDouble(double x, double y) {
+inline float MyMaxFloat(float x, float y) {
   return x > y ? x : y;
 }
 
@@ -77,7 +77,7 @@ inline int MyMinInt(int x, int y) {
   return x < y ? x : y;
 }
 
-inline double MyMinDouble(double x, double y) {
+inline float MyMinFloat(float x, float y) {
   return x < y ? x : y;
 }
 
@@ -88,28 +88,28 @@ inline double MyMinDouble(double x, double y) {
 // DCCorrection interpolates the power under f0 Hz
 // and is used in CheapTrick() and D4C().
 //-----------------------------------------------------------------------------
-void DCCorrection(const double *input, double current_f0, int fs, int fft_size,
-    double *output);
+void DCCorrection(const float *input, float current_f0, int fs, int fft_size,
+    float *output);
 
 //-----------------------------------------------------------------------------
 // LinearSmoothing() carries out the spectral smoothing by rectangular window
 // whose length is width Hz and is used in CheapTrick() and D4C().
 //-----------------------------------------------------------------------------
-void LinearSmoothing(const double *input, double width, int fs, int fft_size,
-    double *output);
+void LinearSmoothing(const float *input, float width, int fs, int fft_size,
+    float *output);
 
 //-----------------------------------------------------------------------------
 // NuttallWindow() calculates the coefficients of Nuttall window whose length
 // is y_length and is used in Dio(), Harvest() and D4C().
 //-----------------------------------------------------------------------------
-void NuttallWindow(int y_length, double *y);
+void NuttallWindow(int y_length, float *y);
 
 //-----------------------------------------------------------------------------
 // GetSafeAperiodicity() limit the range of aperiodicity from 0.001 to
 // 0.999999999999 (1 - world::kMySafeGuardMinimum).
 //-----------------------------------------------------------------------------
-inline double GetSafeAperiodicity(double x) {
-  return MyMaxDouble(0.001, MyMinDouble(0.999999999999, x));
+inline float GetSafeAperiodicity(float x) {
+  return MyMaxFloat(0.001, MyMinFloat(0.999999999999, x));
 }
 
 //-----------------------------------------------------------------------------

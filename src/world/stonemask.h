@@ -24,9 +24,9 @@ WORLD_BEGIN_C_DECLS
 // Output:
 //   refined_f0             : Refined F0
 //-----------------------------------------------------------------------------
-void StoneMask(const double *x, int x_length, int fs,
-    const double *temporal_positions, const double *f0, int f0_length,
-    double *refined_f0);
+void StoneMask(const float *x, int x_length, int fs,
+    const float *temporal_positions, const float *f0, int f0_length,
+    float *refined_f0);
 
 WORLD_END_C_DECLS
 
